@@ -9,9 +9,6 @@
 #define FENSTER_AUDIO_BUFSZ 8192
 #endif
 
-#include <stdint.h>
-#include <stdlib.h>
-
 #if defined(__APPLE__)
 #include <AudioToolbox/AudioQueue.h>
 struct fenster_audio {
@@ -82,7 +79,8 @@ FENSTER_API void fenster_audio_close(struct fenster_audio *fa) {
   AudioQueueDispose(fa->queue, false);
 }
 FENSTER_API int fenster_audio_available(struct fenster_audio *fa) {
-  if (dispatch_semaphore_wait(fa->drained, DISPATCH_TIME_NOW)) return 0;
+  if (dispatch_semaphore_wait(fa->drained, DISPATCH_TIME_NOW))
+    return 0;
   return FENSTER_AUDIO_BUFSZ - fa->pos;
 }
 FENSTER_API void fenster_audio_write(struct fenster_audio *fa, float *buf,
@@ -97,13 +95,7 @@ FENSTER_API void fenster_audio_write(struct fenster_audio *fa, float *buf,
 }
 #elif defined(_WIN32)
 FENSTER_API int fenster_audio_open(struct fenster_audio *fa) {
-  WAVEFORMATEX wfx = {WAVE_FORMAT_PCM,
-                      1,
-                      FENSTER_SAMPLE_RATE,
-                      FENSTER_SAMPLE_RATE * 2,
-                      1,
-                      16,
-                      0};
+  WAVEFORMATEX wfx = {WAVE_FORMAT_PCM, 1, FENSTER_SAMPLE_RATE, FENSTER_SAMPLE_RATE * 2, 1, 16, 0};
   waveOutOpen(&fa->wo, WAVE_MAPPER, &wfx, 0, 0, CALLBACK_NULL);
   for (int i = 0; i < 2; i++) {
     fa->hdr[i].lpData = fa->buf[i];
@@ -115,7 +107,8 @@ FENSTER_API int fenster_audio_open(struct fenster_audio *fa) {
 }
 FENSTER_API int fenster_audio_available(struct fenster_audio *fa) {
   for (int i = 0; i < 2; i++)
-    if (fa->hdr[i].dwFlags & WHDR_DONE) return FENSTER_AUDIO_BUFSZ;
+    if (fa->hdr[i].dwFlags & WHDR_DONE)
+      return FENSTER_AUDIO_BUFSZ;
   return 0;
 }
 FENSTER_API void fenster_audio_write(struct fenster_audio *fa, float *buf,
@@ -131,37 +124,34 @@ FENSTER_API void fenster_audio_write(struct fenster_audio *fa, float *buf,
   }
 }
 FENSTER_API void fenster_audio_close(struct fenster_audio *fa) {
-  for (int i = 0; i < 2; i++)
-    while (!(fa->hdr[i].dwFlags & WHDR_DONE)) Sleep(10);
   waveOutClose(fa->wo);
 }
-
 #elif defined(__linux__)
 int snd_pcm_open(void **, const char *, int, int);
 int snd_pcm_set_params(void *, int, int, int, int, int, int);
 int snd_pcm_avail(void *);
 int snd_pcm_writei(void *, const void *, unsigned long);
 int snd_pcm_recover(void *, int, int);
-int snd_pcm_drain(void *);
 int snd_pcm_close(void *);
 FENSTER_API int fenster_audio_open(struct fenster_audio *fa) {
-  if (snd_pcm_open(&fa->pcm, "default", 0, 0)) return -1;
+  if (snd_pcm_open(&fa->pcm, "default", 0, 0))
+    return -1;
   int fmt = (*(unsigned char *)(&(uint16_t){1})) ? 14 : 15;
   return snd_pcm_set_params(fa->pcm, fmt, 3, 1, FENSTER_SAMPLE_RATE, 1, 100000);
 }
 FENSTER_API int fenster_audio_available(struct fenster_audio *fa) {
   int n = snd_pcm_avail(fa->pcm);
-  if (n < 0) n = snd_pcm_recover(fa->pcm, n, 0);
-  if (n < 0) return 0;
+  if (n < 0)
+    snd_pcm_recover(fa->pcm, n, 0);
   return n;
 }
 FENSTER_API void fenster_audio_write(struct fenster_audio *fa, float *buf,
                                      size_t n) {
   int r = snd_pcm_writei(fa->pcm, buf, n);
-  if (r < 0) snd_pcm_recover(fa->pcm, r, 0);
+  if (r < 0)
+    snd_pcm_recover(fa->pcm, r, 0);
 }
 FENSTER_API void fenster_audio_close(struct fenster_audio *fa) {
-  snd_pcm_drain(fa->pcm);
   snd_pcm_close(fa->pcm);
 }
 #endif

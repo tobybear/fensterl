@@ -11,7 +11,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/jonasgeiler/fenster"
+	"github.com/zserge/fenster"
 )
 
 //go:embed Testbild.png

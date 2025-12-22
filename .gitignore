@@ -1,32 +1,10 @@
-# Git ignore file
-# See: https://git-scm.com/docs/gitignore
-
-# OS
-.DS_Store
-
-# IDE
-.idea/
-.vscode/
-
-# Output
-/main
-*.out
+main
+a.out
 *.o
-*.so
-*.dll
-*.exp
-*.lib
-*.obj
-*.def
 *.elf
 *.exe
-*.dSYM
+*.dSYM/
 *.pdb
-zig-out
-
-# Cache
 zig-cache
-
-# Temp Files
-/test.lua
+zig-out
 Makefile.local
