@@ -39,7 +39,6 @@ static void usleep(__int64 usec) {
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdint.h>
 
 struct fenster_input_data {
 	uint8_t key_down[256];          // keys are mostly ASCII, but arrows are 17..20 (persisent until release)
@@ -457,11 +456,14 @@ static LRESULT CALLBACK fenster_wndproc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
 			bi.bmiColors[1].rgbGreen = 0xff;
 			bi.bmiColors[2].rgbBlue = 0xff;
 			SetDIBitsToDevice(memdc, 0, 0, f->width, f->height, 0, 0, 0, f->height, f->buf, (BITMAPINFO *)&bi, DIB_RGB_COLORS);
+			BitBlt(hdc, 0, 0, f->win_width, f->win_height, memdc, 0, 0, SRCCOPY);
+			/*
 			if (f->width == f->win_width && f->height == f->win_height) {
 				BitBlt(hdc, 0, 0, f->win_width, f->win_height, memdc, 0, 0, SRCCOPY);
 			} else {
 				StretchBlt(hdc, 0, 0, f->win_width, f->win_height, memdc, 0, 0, f->width, f->height, SRCCOPY);
 			}
+			*/
 #endif // FENSTER_STRETCH
 			SelectObject(memdc, oldbmp);
 			DeleteObject(hbmp);
@@ -537,11 +539,14 @@ static LRESULT CALLBACK fenster_wndproc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
 	return 0;
 }
 
+#include <stdio.h>
 FENSTER_API int fenster_open(struct fenster* f) {
 	int win_style, adjusted_width, adjusted_height;
 	size_t title_len = strlen(f->title);
-	RECT desiredRect = {0, 0, f->width, f->height};
-	wchar_t* title_w;
+	RECT desired_rect = {0, 0, f->width, f->height};
+	char* title_w;
+	int i;
+	int j = 0;
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	WNDCLASSEX wc = {0};
@@ -549,7 +554,12 @@ FENSTER_API int fenster_open(struct fenster* f) {
 	wc.style = CS_VREDRAW | CS_HREDRAW;
 	wc.lpfnWndProc = fenster_wndproc;
 	wc.hInstance = hInstance;
-	title_w = (wchar_t*)malloc(title_len * 2 + 1);
+
+#ifndef FENSTER_STRETCH
+	f->allow_resize = 0;
+#endif // !FENSTER_STRETCH
+	title_w = (char*)malloc(title_len * 2 + 2);
+	memset(title_w, 0, title_len * 2 + 2);
 	f->win_width = f->width;
 	f->win_height = f->height;
 #ifdef FENSTER_STRETCH
@@ -558,21 +568,23 @@ FENSTER_API int fenster_open(struct fenster* f) {
 #endif
 	f->scale_x = 1.f;
 	f->scale_y = 1.f;
-
-	mbstowcs_s(&title_len, title_w, title_len * 2, f->title, title_len);
+	for (i = 0; i < title_len; i++) {
+		title_w[j] = f->title[i];
+		j += 2;
+	}
 	wc.lpszClassName = (LPCWSTR)title_w;
 	RegisterClassEx(&wc);
 	win_style = f->allow_resize ? WS_OVERLAPPEDWINDOW : WS_NORESIZE;
-	AdjustWindowRectEx(&desiredRect, win_style, FALSE, WS_EX_CLIENTEDGE);
-	adjusted_width = desiredRect.right - desiredRect.left;
-	adjusted_height = desiredRect.bottom - desiredRect.top;
-	f->hwnd = CreateWindowEx(0, title_w, title_w, win_style, CW_USEDEFAULT, CW_USEDEFAULT,
+	AdjustWindowRectEx(&desired_rect, win_style, FALSE, WS_EX_CLIENTEDGE);
+	adjusted_width = desired_rect.right - desired_rect.left;
+	adjusted_height = desired_rect.bottom - desired_rect.top;
+	f->hwnd = CreateWindowEx(0, (LPCWSTR)title_w, (LPCWSTR)title_w, win_style, CW_USEDEFAULT, CW_USEDEFAULT,
 		adjusted_width, adjusted_height, NULL, NULL, hInstance, NULL);
-	//x free(title_w);
 	if (f->hwnd == NULL) return -1;
 	SetWindowLongPtr(f->hwnd, GWLP_USERDATA, (LONG_PTR)f);
 	ShowWindow(f->hwnd, SW_NORMAL);
 	UpdateWindow(f->hwnd);
+	free(title_w);
 	return 0;
 }
 
@@ -684,9 +696,9 @@ FENSTER_API void fenster_cursor(struct fenster* f, const int type) {
 #endif // FENSTER_CURSOR
 
 FENSTER_API void fenster_resize(struct fenster* f, const int width, const int height) {
-	if (f->allow_resize == 0) return;
 	RECT rect = { 0, 0, width, height };
 	int win_style = f->allow_resize ? WS_OVERLAPPEDWINDOW : WS_NORESIZE;
+	if (f->allow_resize == 0) return;
 	AdjustWindowRectEx(&rect, win_style, FALSE, 0);
 	SetWindowPos(f->hwnd, NULL, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE | SWP_NOZORDER);
 }

@@ -37,7 +37,7 @@ void M_FindResponseFile(void);
 void dg_Create();
 
 
-int main(int argc, char **argv)
+int i_main(int argc, char **argv)
 {
     // save arguments
 

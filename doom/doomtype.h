@@ -32,8 +32,8 @@
 
 #else
 
-#include <strings.h>
-
+#include <string.h>
+#include <stdbool.h>
 #endif
 
 
@@ -62,32 +62,28 @@
 
 #include <inttypes.h>
 
-#include <stdbool.h>
-typedef bool boolean;
-/*
-#ifdef __cplusplus
+#if defined(__cplusplus) || defined(__bool_true_false_are_defined)
 
 // Use builtin bool type with C++.
 
-typedef bool boolean;
+typedef int boolean;
 
 #else
 
 typedef enum 
 {
-    false	= 0,
-    true	= 1,
+    //false	= 0,
+    //true	= 1,
 	undef	= 0xFFFFFFFF
 } boolean;
 
 #endif
-*/
 
 typedef uint8_t byte;
 
 #include <limits.h>
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__DJGPP__)
 
 #define DIR_SEPARATOR '\\'
 #define DIR_SEPARATOR_S "\\"
