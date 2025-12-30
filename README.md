@@ -65,17 +65,27 @@ That's it.
 API is designed to be a polling loop, where on every iteration the framebuffer get updated and the user input (mouse/keyboard) can be polled.
 
 ```c
-struct fenster {
-  const char *title; /* window title */
-  const int width; /* window width */
-  const int height; /* window height */
-  uint32_t *buf; /* window pixels, 24-bit RGB, row by row, pixel by pixel */
-  int keys[256]; /* keys are mostly ASCII, but arrows are 17..20 */
-  int mod;       /* mod is 4 bits mask, ctrl=1, shift=2, alt=4, meta=8 */
-  int x;         /* mouse X coordinate */
-  int y;         /* mouse Y coordinate */
-  int mouse;     /* 0 = no buttons pressed, 1 = left button pressed */
+struct fenster_input_data {
+	uint8_t key_down[256];          /* keys are mostly ASCII, but arrows are 17..20 (persistent until release) */
+	uint8_t key[256];               /* like key_down, but one press signal only (one click) */
+	uint8_t key_mod[4];             /* ctrl, shift, alt, meta */
+	uint32_t mouse_pos[2];          /* mouse x, y */
+	uint8_t mouse_button[5];        /* left, right, middle, scroll up, scroll down (one click) */
+	uint8_t mouse_button_down[3];   /* left, right, middle (persistent until release) */
 };
+
+struct fenster {
+	const char* title; /* window title */
+	int width; /* pixel buffer width */
+	int height; /* pixel buffer height */
+	uint32_t* buf; /* actual pixel buffer, 24-bit RGB, row by row, pixel by pixel */
+	struct fenster_input_data inp; /* see structure above */
+	uint8_t allow_resize; /* set this to 1 to allow window resizing */
+	int win_width; /* size of the window */
+	int win_height; /* height of the window */
+	int64_t last_sync;   // last sync time
+};
+
 ```
 
 * `int fenster_open(struct fenster *f)` - opens a new app window.
