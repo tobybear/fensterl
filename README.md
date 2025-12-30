@@ -1,9 +1,10 @@
 # Fensterl
 
 Fenster /ˈfɛnstɐ/ -- a German word for "window".
+
 Fensterl /ˈfɛnstɐl/ -- a Bavarian (South-German dialect) word for "tiny window".
 
-This library is a direct derivate of "Fenster" (https://github.com/zserge/fenster), but with several bugfixes and new features added by me and other authors.
+This library is a direct derivate of "Fenster" (https://github.com/zserge/fenster), but with several bugfixes and new features added by me and other authors (most notably the open pull requests from https://github.com/zserge/fenster/pulls) as well as the addons by Vaguiner Gonzalez dos Santos from here: https://github.com/vaguinerg/fensterb.
 
 What is it?
 This library provides a small and highly opinionated way to display a cross-platform 2D canvas. If you remember Borland BGI or drawing things in QBASIC or `INT 10h`- you know what I mean. As a nice bonus you also get cross-platform keyboard/mouse input and audio playback in only a few lines of code.
