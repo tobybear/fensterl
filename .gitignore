@@ -1,10 +1,9 @@
 main
-a.out
+*.out
 *.o
 *.elf
 *.exe
+*.wad
 *.dSYM/
 *.pdb
-zig-cache
-zig-out
 Makefile.local

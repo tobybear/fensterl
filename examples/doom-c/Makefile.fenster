@@ -1,6 +1,5 @@
-CC=gcc
 CFLAGS+=-Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE
-LIBS+=-lm
+LIBS+=-lm -lc
 ifeq ($(OS),Windows_NT)
 	LIBS+= -lgdi32
 else

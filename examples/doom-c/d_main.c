@@ -127,6 +127,7 @@ char		mapdir[1024];           // directory of development maps
 
 int             show_endoom = 1;
 
+boolean         quitgame = false;      	// time to quit 
 
 void D_ConnectNetGame(void);
 void D_CheckNetGame(void);
@@ -439,7 +440,7 @@ void D_DoomLoop (void)
         wipegamestate = gamestate;
     }
 
-    while (1)
+    while (quitgame == false)
     {
 		// frame syncronous IO operations
 		I_StartFrame ();
@@ -1080,7 +1081,7 @@ static void D_Endoom(void)
 
     I_Endoom(endoom);
 
-	exit(0);
+//	exit(0);
 }
 
 #if ORIGCODE

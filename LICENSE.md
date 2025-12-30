@@ -2,7 +2,9 @@ MIT License
 ===========
 
 Copyright (c) 2022-2024 Serge Zaitsev  
+Copyright (c) 2024 Vaguiner Gonzalez dos Santos 
 Copyright (c) 2025 Jonas Geiler
+Copyright (c) 2025 Tobias Fleischer
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
